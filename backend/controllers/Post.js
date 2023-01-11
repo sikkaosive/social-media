@@ -111,7 +111,7 @@ exports.getPostsOfFollowing = async (req, res) => {
       owner: {
         $in: user.following,
       },
-    });
+    }).populate("owner likes comments.user");
 
     res.status(200).json({
       success: true,
@@ -119,7 +119,7 @@ exports.getPostsOfFollowing = async (req, res) => {
       // following: user.following,
 
       //another way
-      posts,
+      posts: posts.reverse(),
     });
   } catch (error) {
     res.status(500).json({
@@ -214,15 +214,13 @@ exports.deleteComment = async (req, res) => {
     }
 
     if (post.owner.toString() === req.user._id.toString()) {
-    
-    if(req.body.commentId===undefined){
-      return res.status(400).json({
-        success: false,
-        message: "Comment id is required",
-      });
-    }
+      if (req.body.commentId === undefined) {
+        return res.status(400).json({
+          success: false,
+          message: "Comment id is required",
+        });
+      }
 
-    
       post.comments.forEach((item, index) => {
         if (item._id.toString() === req.user.commentId.toString()) {
           return post.comments.splice(index, 1);
